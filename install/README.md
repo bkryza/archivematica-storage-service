@@ -74,6 +74,11 @@ of these settings or provide values to mandatory fields.
     - **Type:** `boolean`
     - **Default:** `false`
 
+- **`SS_CAS_AUTHENTICATION`**:
+    - **Description:** enables the CAS (Central Authentication Service) authentication system. Other settings related to CAS cannot be defined via environment variables at the moment, please edit [storage_service.settings.base](../storage_service/storage_service/settings/base.py) manually.
+    - **Type:** `boolean`
+    - **Default:** `false`
+
 - **`SS_BAG_VALIDATION_NO_PROCESSES`**:
     - **Description:** number of concurrent processes used by BagIt. If Gunicorn is being used to serve the Storage Service and its worker class is set to `gevent`, then BagIt validation must use 1 process. Otherwise, calls to `validate` will hang because of the incompatibility between gevent and multiprocessing (BagIt) concurrency strategies. See [#708](https://github.com/artefactual/archivematica/issues/708).
     - **Type:** `int`

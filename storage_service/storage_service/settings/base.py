@@ -465,6 +465,30 @@ if SHIBBOLETH_AUTHENTICATION:
 
     ALLOW_USER_EDITS = False
 
+######### CAS CONFIGURATION #########
+CAS_AUTHENTICATION = is_true(environ.get("SS_CAS_AUTHENTICATION", ""))
+if CAS_AUTHENTICATION:
+    CAS_SERVER_URL = "https://django-cas-ng-demo-server.herokuapp.com/cas/"
+    CAS_VERSION = "3"
+
+    CAS_LOGIN_MSG = None
+    CAS_LOGIN_URL_NAME = "login"
+    CAS_LOGOUT_URL_NAME = "logout"
+
+    AUTHENTICATION_BACKENDS += ["django_cas_ng.backends.CASBackend"]
+
+    # Insert CAS after the authentication middleware
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+        "django_cas_ng.middleware.CASMiddleware",
+    )
+
+    INSTALLED_APPS += ["django_cas_ng"]
+
+    ALLOW_USER_EDITS = False
+
+######### END CAS CONFIGURATION #########
+
 # WARNING: if Gunicorn is being used to serve the Storage Service and its
 # worker class is set to `gevent`, then BagIt validation must use 1 process.
 # Otherwise, calls to `validate` will hang because of the incompatibility
