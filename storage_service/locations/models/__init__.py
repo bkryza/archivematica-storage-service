@@ -39,6 +39,7 @@ from .gpg import GPG
 from .local_filesystem import LocalFilesystem
 from .lockssomatic import Lockssomatic
 from .nfs import NFS
+from .onedata import Onedata
 from .pipeline_local import PipelineLocalFS
 from .swift import Swift
 from .s3 import S3

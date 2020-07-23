@@ -143,6 +143,7 @@ class Space(models.Model):
     LOCAL_FILESYSTEM = "FS"
     LOM = "LOM"
     NFS = "NFS"
+    ONEDATA = "ONEDATA"
     PIPELINE_LOCAL_FS = "PIPE_FS"
     SWIFT = "SWIFT"
     GPG = "GPG"
@@ -161,6 +162,7 @@ class Space(models.Model):
         (LOCAL_FILESYSTEM, _("Local Filesystem")),
         (LOM, _("LOCKSS-o-matic")),
         (NFS, _("NFS")),
+        (ONEDATA, _("ONEDATA")),
         (PIPELINE_LOCAL_FS, _("Pipeline Local Filesystem")),
         (SWIFT, _("Swift")),
         (S3, _("S3")),

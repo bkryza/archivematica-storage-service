@@ -265,6 +265,12 @@ class S3Form(forms.ModelForm):
         )
 
 
+class OnedataForm(forms.ModelForm):
+    class Meta:
+        model = models.Onedata
+        fields = ("oneprovider_host", "access_token", "space_name")
+
+
 class LocationForm(forms.ModelForm):
     default = forms.BooleanField(
         required=False, label=_("Set as global default location for its purpose")
