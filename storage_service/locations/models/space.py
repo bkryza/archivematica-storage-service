@@ -235,6 +235,8 @@ class Space(models.Model):
 
         protocol_model = PROTOCOL[self.access_protocol]["model"]
         protocol_space = protocol_model.objects.get(space=self)
+
+        LOGGER.error("protocol model=%s protocol space=%s", protocol_model, str(protocol_space))
         # TODO try-catch AttributeError if remote_user or remote_name not exist?
         return protocol_space
 
@@ -272,13 +274,15 @@ class Space(models.Model):
         :param str path: Full path to return info for
         :return: Dictionary of object information detailed above.
         """
-        LOGGER.info("path: %s", path)
+        LOGGER.error("path: %s", path)
         try:
             return self.get_child_space().browse(path, *args, **kwargs)
         except AttributeError as e:
-            LOGGER.debug("AttributeError while browsing %s: %r", path, e)
-            LOGGER.debug("Falling back to default browse local", exc_info=False)
+            LOGGER.error("AttributeError while browsing %s: %r", path, e)
+            LOGGER.error("Falling back to default browse local", exc_info=False)
             return self.browse_local(path)
+        except Exception as e:
+            LOGGER.error("Exception while browsing %s: %r", path, e)
 
     def delete_path(self, delete_path, *args, **kwargs):
         """

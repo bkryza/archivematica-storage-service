@@ -268,7 +268,15 @@ class S3Form(forms.ModelForm):
 class OnedataForm(forms.ModelForm):
     class Meta:
         model = models.Onedata
-        fields = ("oneprovider_host", "access_token", "space_name")
+        fields = (
+            "oneprovider_host",
+            "access_token",
+            "space_name",
+            "space_guid",
+            "manually_mounted",
+            "only_local_replicas",
+            "oneclient_cli",
+        )
 
 
 class LocationForm(forms.ModelForm):

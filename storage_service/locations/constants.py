@@ -108,13 +108,17 @@ PROTOCOL = {
             "bucket",
         ],
     },
-    models.Space.Onedata: {
+    models.Space.ONEDATA: {
         "model": models.Onedata,
         "form": forms.OnedataForm,
         "fields": [
             "oneprovider_host",
             "access_token",
-            "space_name"
-        ]
+            "space_name",
+            "space_guid",
+            "manually_mounted",
+            "only_local_replicas",
+            "oneclient_cli",
+        ],
     }
 }
