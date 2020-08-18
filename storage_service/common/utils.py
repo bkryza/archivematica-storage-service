@@ -360,6 +360,7 @@ def get_compress_command(compression, extract_path, basename, full_path):
         command = [
             "tar",
             "c",  # Create tar
+            "-h",  # Derefence symlinks
             algo,  # Optional compression flag
             "-C",
             relative_path,  # Work in this directory

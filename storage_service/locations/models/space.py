@@ -236,7 +236,7 @@ class Space(models.Model):
         protocol_model = PROTOCOL[self.access_protocol]["model"]
         protocol_space = protocol_model.objects.get(space=self)
 
-        LOGGER.error("protocol model=%s protocol space=%s", protocol_model, str(protocol_space))
+        LOGGER.info("protocol model=%s protocol space=%s", protocol_model, str(protocol_space))
         # TODO try-catch AttributeError if remote_user or remote_name not exist?
         return protocol_space
 
@@ -570,16 +570,18 @@ class Space(models.Model):
                 LOGGER.debug("os.rename failed, trying with normalized paths")
             source_norm = os.path.normpath(source)
             dest_norm = os.path.normpath(destination)
+            LOGGER.info("Moving normalized from %s to %s", source_norm, dest_norm)
             try:
                 os.rename(source_norm, dest_norm)
                 # Set permissions (rsync does with --chmod=ugo+rw)
-                subprocess.call(chmod_command)
+                # subprocess.call(chmod_command)
                 return
-            except OSError:
+            except OSError as e:
                 LOGGER.debug(
-                    "os.rename failed, falling back to rsync. Source: %s; Destination: %s",
+                        "os.rename failed, falling back to rsync. Source: %s; Destination: %s, Error: %s",
                     source_norm,
                     dest_norm,
+                    e
                 )
 
         # Rsync file over
@@ -589,6 +591,7 @@ class Space(models.Model):
             "-t",
             "-O",
             "--protect-args",
+            "--links",
             "-vv",
             "--chmod=Fug+rw,o-rwx,Dug+rwx,o-rwx",
             "-r",

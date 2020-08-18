@@ -83,8 +83,8 @@ def count_objects(path, only_local_replicas):
         count += 1
 
         # Limit the number of files
-        if count >= 25000:
-            return "25000+"
+        if count >= 5000:
+            return "5000+"
 
     return count
 
@@ -183,25 +183,73 @@ class Onedata(models.Model):
 
         return generate_directory_tree(path, self.only_local_replicas)
 
-    def move_to_storage_service(self, src_path, dest_path, dest_space):
+    def move_to_storage_service(self, src_path_, dest_path_, dest_space):
         """ Moves src_path to dest_space.staging_path/dest_path. """
-        LOGGER.info("Moving file from {} to storage path {} and space {}".format(
+        src_path = os.path.normpath(src_path_)
+        dest_path = os.path.normpath(dest_path_)
+
+        LOGGER.info("move_to_storage_service: Syncing files from {} to storage path {} and space {}".format(
             src_path, dest_path, dest_space))
 
         self.mount()
 
+        LOGGER.info("Creating local directory: {}".format(dest_path))
         self.space.create_local_directory(dest_path)
-        return self.space.move_rsync(src_path, dest_path)
+        if not os.path.isdir(dest_path):
+            LOGGER.info("Failed to create local directory - retrying")
+            try:
+                os.makedirs(dest_path)
+            except Exception as e:
+                LOGGER.error("Failed to create local directory {} because {}".format(dest_path, str(e)))
 
-    def move_from_storage_service(self, source_path, destination_path, package=None):
+        for root, dirs, files in os.walk(src_path):
+            LOGGER.info("Traversing directory {}".format(root))
+            rel_root = os.path.relpath(root, src_path)
+            for d in dirs:
+                dest_dir = os.path.normpath(os.path.join(dest_path, os.path.join(rel_root, d)))
+                LOGGER.info("Creating directory {}".format(dest_dir))
+                if not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir)
+            for f in files:
+                dest_file = os.path.normpath(os.path.join(dest_path, os.path.join(rel_root, f)))
+                LOGGER.info("Symlinking source file {} to {}".format(os.path.join(root, f), dest_file))
+                try:
+                    os.symlink(os.path.join(root, f), dest_file)
+                    if not os.path.islink(dest_file):
+                        LOGGER.error("Failed to create symlink: {}", dest_file)
+                except Exception as e:
+                    LOGGER.error("Failed to create local symlink {} because {}".format(dest_file, str(e)))
+
+
+        #return self.space.move_rsync(src_path, dest_path)
+
+
+    def move_from_storage_service(self, src_path_, dest_path_, package=None):
         """ Moves self.staging_path/src_path to dest_path. """
-        LOGGER.info("Moving file from storage {} to path {}".format(
-            source_path, destination_path))
+        src_path = os.path.normpath(src_path_)
+        dest_path = os.path.normpath(dest_path_)
+
+        LOGGER.info("move_from_storage_service: Moving file from storage {} to path {}".format(
+            src_path, dest_path))
 
         self.mount()
 
-        self.space.create_local_directory(destination_path)
-        return self.space.move_rsync(source_path, destination_path, try_mv_local=False)
+        self.space.create_local_directory(dest_path)
+        for root, dirs, files in os.walk(src_path):
+            LOGGER.info("Traversing directory {}".format(root))
+            rel_root = os.path.relpath(root, src_path)
+            for d in dirs:
+                dest_dir = os.path.join(dest_path, os.path.join(rel_root, d))
+                LOGGER.info("Creating directory {}".format(dest_dir))
+                if not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir)
+            for f in files:
+                dest_file = os.path.join(dest_path, os.path.join(rel_root, f))
+                LOGGER.info("Symlinking source file {} to {}".format(os.path.join(root, f), dest_file))
+                os.symlink(os.path.join(root, f), dest_file)
+
+
+        #return self.space.move_rsync(source_path, destination_path, try_mv_local=False)
 
     def save(self, *args, **kwargs):
         if not self.space.path:
@@ -235,6 +283,7 @@ class Onedata(models.Model):
                 os.makedirs(mountpoint)
 
             oneclient_command = ["oneclient",
+                                 "--force-proxy-io",
                                  "-t", self.access_token,
                                  "-H", self.oneprovider_host,
                                  "--space", self.space_name]

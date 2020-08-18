@@ -119,9 +119,9 @@ class AsyncManager(object):
                         % (task.async_id)
                     )
 
-            LOGGER.debug(
-                "Watchdog sees %d tasks running" % (len(AsyncManager.running_tasks))
-            )
+            #LOGGER.debug(
+            #    "Watchdog sees %d tasks running" % (len(AsyncManager.running_tasks))
+            #)
 
     @staticmethod
     def _wrap_task(task, task_fn):

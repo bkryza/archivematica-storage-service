@@ -59,6 +59,8 @@ RUN oneclient -h
 
 USER archivematica
 
+RUN mkdir /tmp/oneclient-mnt
+
 RUN env \
 	DJANGO_SETTINGS_MODULE=storage_service.settings.local \
 	SS_DB_URL=mysql://ne:ver@min/d \

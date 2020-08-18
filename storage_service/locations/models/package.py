@@ -1603,7 +1603,7 @@ class Package(models.Model):
             Given that compressed packages are likely to be large, this should
             generally be deleted after use if a temporary directory was used.
         """
-        LOGGER.debug("in package.py::compress_package")
+        LOGGER.debug("Compressing package using %s to %s", algorith, extract_path)
 
         if extract_path is None:
             ss_internal = Location.active.get(purpose=Location.STORAGE_SERVICE_INTERNAL)
@@ -1624,6 +1624,8 @@ class Package(models.Model):
         command, compressed_filename = utils.get_compress_command(
             algorithm, extract_path, basename, full_path
         )
+
+        LOGGER.debug("Compressing to %s using command \"%s\"", compressed_filename, command)
 
         LOGGER.info("Compressing package with: %s to %s", command, compressed_filename)
         if detailed_output:
@@ -2299,10 +2301,13 @@ class Package(models.Model):
             reingest_path,
         )
 
+        LOGGER.debug("Checking if %s is a regular file", rein_aip_internal_path)
         # Take note of whether the new version of the AIP should be compressed.
         to_be_compressed = rein_aip_is_compressed = os.path.isfile(
             rein_aip_internal_path
         )
+
+        LOGGER.debug("Will the package be compressed: %s", to_be_compressed)
 
         # Extract reingested AIP, if needed
         if rein_aip_is_compressed:

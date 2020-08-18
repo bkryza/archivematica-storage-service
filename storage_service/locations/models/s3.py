@@ -110,14 +110,16 @@ class S3(models.Model):
             via-- Amazon AWS: https://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketHEAD.html
         """
         LOGGER.debug("Test the S3 bucket '%s' exists", self.bucket_name)
+        LOGGER.debug("S3 client details: %s", str(self.resource.meta.client.__dict__))
         try:
             loc_info = self.resource.meta.client.get_bucket_location(
                 Bucket=self.bucket_name
             )
-            LOGGER.debug("S3 bucket's response: %s", loc_info)
+            LOGGER.debug("S3 bucket's response: %s", str(loc_info))
         except botocore.exceptions.ClientError as err:
             error_code = err.response["Error"]["Code"]
             if error_code != "NoSuchBucket":
+                LOGGER.info("Cannot access bucket: %s, %s", self.bucket_name, str(err))
                 raise StorageException(err)
             LOGGER.info("Creating S3 bucket '%s'", self.bucket_name)
             # LocationConstraint cannot be specified if it us-east-1 because it is the default, see: https://github.com/boto/boto3/issues/125
@@ -224,6 +226,7 @@ class S3(models.Model):
                 bucket.download_file(objectSummary.key, dest_file)
 
     def move_from_storage_service(self, src_path, dest_path, package=None):
+        LOGGER.info("S3 move from storage: %s, %s, %s", src_path, dest_path, str(package))
         self._ensure_bucket_exists()
         bucket = self.resource.Bucket(self.bucket_name)
 
