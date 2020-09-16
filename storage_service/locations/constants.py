@@ -116,6 +116,8 @@ PROTOCOL = {
             "access_token",
             "space_name",
             "space_guid",
+            "oneclient_rest_endpoint",
+            "oneclient_rest_endpoint",
             "manually_mounted",
             "only_local_replicas",
             "oneclient_cli",

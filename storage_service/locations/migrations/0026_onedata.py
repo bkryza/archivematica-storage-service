@@ -51,6 +51,13 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "oneclient_rest_endpoint",
+                    models.CharField(
+                        max_length=2048,
+                        verbose_name="Oneclient REST endpoint",
+                    ),
+                ),
+                (
                     "manually_mounted",
                     models.BooleanField(
                         verbose_name="Oneclient is manually mounted",
