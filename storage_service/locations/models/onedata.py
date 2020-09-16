@@ -283,7 +283,7 @@ class Onedata(models.Model):
         """Mount Oneclient in K8S pod."""
         LOGGER.debug("Mounting Oneclient in K8S pod")
 
-        command_string = str(' '.join(oneclient_command))
+        command_string = str(' '.join(command))
         b64 = base64.b64encode(command_string)
 
         request = "{}/exec?cmd={}".format(endpoint, b64)
@@ -322,23 +322,23 @@ class Onedata(models.Model):
 
         if self.oneclient_rest_endpoint:
             try:
-                exit_code, body = execute_in_pod(
+                exit_code, body = self.execute_in_pod(
                         self.oneclient_rest_endpoint, ["ls", mountpoint])
                 if exit_code == 0 and body.contains(self.space_name):
                     LOGGER.info("Oneclient already mounted")
                 else:
                     LOGGER.info("Oneclient is not mounted - remounting")
-                    execute_in_pod(
+                    self.execute_in_pod(
                             self.oneclient_rest_endpoint,
                             ["mkdir", "-p", self.mountpoint])
-                    execute_in_pod(
+                    self.execute_in_pod(
                             self.oneclient_rest_endpoint,
                             ["fusermount", "-uz", self.mountpoint])
-                    execute_in_pod(
+                    self.execute_in_pod(
                             self.oneclient_rest_endpoint, oneclient_command)
             except Exception as e:
-                LOGGER.error("Failed mounting oneclient using {}".format(
-                    self.oneclient_rest_endpoint))
+                LOGGER.error("Failed mounting oneclient using {}: {}".format(
+                    self.oneclient_rest_endpoint, str(e)))
         else:
             if not os.path.ismount(mountpoint):
                 # If the mountpoint does not exist, create it

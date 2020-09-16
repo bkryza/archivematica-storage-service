@@ -55,6 +55,12 @@ RUN pip install xattr
 RUN curl --output /tmp/oneclient_20.2.1.deb http://get.onedata.org/apt/ubuntu/2002/pool/main/o/oneclient/oneclient_20.02.1-1~bionic_amd64.deb && \
     apt install /tmp/oneclient_20.2.1.deb
 
+RUN apt-get -y install sudo
+RUN adduser archivematica sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# Enable updating migrations without sudo
+RUN sudo chmod a+rw /src/storage_service/locations/migrations/
+
 RUN oneclient -h
 
 USER archivematica
