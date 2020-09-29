@@ -281,16 +281,16 @@ class Onedata(models.Model):
 
     def execute_in_pod(self, endpoint, command):
         """Mount Oneclient in K8S pod."""
-        LOGGER.debug("Mounting Oneclient in K8S pod")
 
         command_string = str(' '.join(command))
         b64 = base64.b64encode(command_string)
 
+        LOGGER.debug("Executing command in pod '{}'".format(command_string))
         request = "{}/exec?cmd={}".format(endpoint, b64)
         LOGGER.debug("Executing REST call {}".format(request))
         response = requests.get(request, timeout=15)
 
-        exit_code = int(response.get('X-Shell2http-Exit-Code'))
+        exit_code = int(response.headers['X-Shell2http-Exit-Code'])
         body = response.text
 
         if exit_code != 0:
@@ -311,6 +311,7 @@ class Onedata(models.Model):
         oneclient_command = ["oneclient",
                              "--enable-archivematica",
                              "--force-proxy-io",
+                             "-o", "allow_other",
                              "-t", self.access_token,
                              "-H", self.oneprovider_host,
                              "--space", self.space_name]
@@ -324,16 +325,16 @@ class Onedata(models.Model):
             try:
                 exit_code, body = self.execute_in_pod(
                         self.oneclient_rest_endpoint, ["ls", mountpoint])
-                if exit_code == 0 and body.contains(self.space_name):
+                if exit_code == 0 and self.space_name in body:
                     LOGGER.info("Oneclient already mounted")
                 else:
                     LOGGER.info("Oneclient is not mounted - remounting")
                     self.execute_in_pod(
                             self.oneclient_rest_endpoint,
-                            ["mkdir", "-p", self.mountpoint])
+                            ["mkdir", "-p", mountpoint])
                     self.execute_in_pod(
                             self.oneclient_rest_endpoint,
-                            ["fusermount", "-uz", self.mountpoint])
+                            ["fusermount", "-uz", mountpoint])
                     self.execute_in_pod(
                             self.oneclient_rest_endpoint, oneclient_command)
             except Exception as e:
