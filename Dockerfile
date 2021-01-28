@@ -52,8 +52,8 @@ RUN set -ex \
 
 RUN apt update && apt-get -y install fuse
 RUN pip install xattr
-RUN curl --output /tmp/oneclient_20.2.1.deb http://get.onedata.org/apt/ubuntu/2002/pool/main/o/oneclient/oneclient_20.02.1-1~bionic_amd64.deb && \
-    apt install /tmp/oneclient_20.2.1.deb
+RUN curl --output /tmp/oneclient_20.02.5.deb http://packages.onedata.org/apt/ubuntu/2002/pool/main/o/oneclient/oneclient_20.02.5-1~bionic_amd64.deb && \
+    apt install /tmp/oneclient_20.02.5.deb
 
 RUN apt-get -y install sudo
 RUN adduser archivematica sudo
